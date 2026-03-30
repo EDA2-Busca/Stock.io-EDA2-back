@@ -1,55 +1,80 @@
-// Importa Prisma Client e o Enum direto do pacote padrão
 import { PrismaClient, CategoriasNome } from '@prisma/client';
 
-// 2. Inicializa o Prisma
 const prisma = new PrismaClient();
 
-// 3. Define os dados que queremos criar
-// (Esta é a lista que você me deu, agora em formato de dados)
-const seedData = [
-  { nome: CategoriasNome.MERCADO, subcategorias: ['Hortifruti', 'Açougue e Peixaria', 'Padaria', 'Bebidas'] },
-  { nome: CategoriasNome.FARMACIA, subcategorias: ['Medicamentos', 'Vitaminas', 'Higiene Pessoal', 'Primeiros Socorros'] },
-  { nome: CategoriasNome.BELEZA, subcategorias: ['Maquiagem', 'Skincare', 'Cabelo', 'Perfumes'] },
-  { nome: CategoriasNome.MODA, subcategorias: ['Feminino', 'Masculino', 'Calçados', 'Acessórios'] },
-  { nome: CategoriasNome.ELETRONICOS, subcategorias: ['Celulares', 'Computadores', 'TVs e Vídeo', 'Áudio'] },
-  { nome: CategoriasNome.JOGOS, subcategorias: ['Jogos de Console', 'Jogos de PC', 'Consoles', 'Acessórios Gamer'] },
-  { nome: CategoriasNome.BRINQUEDOS, subcategorias: ['Bonecas', 'Jogos de Tabuleiro', 'Blocos de Montar', 'Carrinhos'] },
-  { nome: CategoriasNome.CASA, subcategorias: ['Cama, Mesa e Banho', 'Eletrodomésticos', 'Decoração', 'Cozinha'] },
-];
-
 async function main() {
-  console.log(`Iniciando o seeding...`);
+  console.log('--- Iniciando Seeding Corrigido ---');
 
-  // 4. Itera sobre cada categoria na nossa lista
-  for (const cat of seedData) {
-    
-    // 5. Usa 'upsert' (atualizar ou inserir)
-    // Isso é inteligente: se a categoria 'MERCADO' já existir, ele não faz nada.
-    // Se não existir, ele a cria.
-    await prisma.categoria.upsert({
-      where: { nome: cat.nome }, // Como encontrar a categoria
-      update: {}, // O que fazer se encontrar (nada)
-      create: {
-        // O que fazer se NÃO encontrar (criar)
-        nome: cat.nome,
-        // 6. A MÁGICA:
-        // Cria as subcategorias filhas AO MESMO TEMPO
-        subcategorias: {
-          create: cat.subcategorias.map(subNome => ({ nome: subNome })),
-        },
-      },
+  const usuario = await prisma.usuario.upsert({
+    where: { email: 'admin@stockio.com' },
+    update: {},
+    create: {
+      email: 'admin@stockio.com',
+      userName: 'admin_andre',
+      nome: 'André Admin',
+      senhaHash: '123456', 
+    },
+  });
+
+  const catMercado = await prisma.categoria.upsert({
+    where: { nome: CategoriasNome.MERCADO },
+    update: {},
+    create: {
+      nome: CategoriasNome.MERCADO,
+      subcategorias: {
+        create: [{ nome: 'Hortifruti' }, { nome: 'Padaria' }]
+      }
+    },
+    include: { subcategorias: true }
+  });
+
+  const subId = catMercado.subcategorias[0].id;
+
+  const loja = await prisma.loja.upsert({
+    where: { nome: 'Mercado do André' },
+    update: {},
+    create: {
+      nome: 'Mercado do André',
+      descricao: 'O melhor mercado do projeto EDA!',
+      usuarioId: usuario.id,
+      categoriaId: catMercado.id,
+      logo: 'https://via.placeholder.com/150',
+    },
+  });
+
+  const produtos = [
+    {
+      nome: 'Maçã Argentina',
+      descricao: 'Maçã vermelha tipo exportação',
+      preco: 10.50,
+      estoque: 100,
+      lojaId: loja.id,
+      subcategoriaId: subId,
+    },
+    {
+      nome: 'Pão Francês',
+      descricao: 'Pão quentinho saindo agora',
+      preco: 0.50,
+      estoque: 200,
+      lojaId: loja.id,
+      subcategoriaId: subId,
+    }
+  ];
+
+  for (const p of produtos) {
+    await prisma.produto.create({
+      data: p
     });
   }
-  console.log(`Seeding finalizado.`);
+
+  console.log('--- Seeding Finalizado com Sucesso! ---');
 }
 
-// 7. Executa a função 'main' e lida com erros
 main()
   .catch((e) => {
     console.error(e);
     process.exit(1);
   })
   .finally(async () => {
-    // 8. Fecha a conexão com o banco
     await prisma.$disconnect();
   });

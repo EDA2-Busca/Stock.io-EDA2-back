@@ -7,7 +7,7 @@ import { CategoriasNome, Loja, Prisma } from '@prisma/client';
 @Injectable()
 export class LojaService {
 
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService) { }
 
     // Cria uma nova loja associada a um usuário
     async create(data: CreateLojaDto, userId: number): Promise<Loja> {
@@ -21,7 +21,7 @@ export class LojaService {
 
         // Verifica se a categoria informada existe no banco de dados
         const categoriaExiste = await this.prisma.categoria.findUnique({
-            where: { id: data.categoriaId },
+            where: { id: Number(data.categoriaId) },
         });
         if (!categoriaExiste) {
             throw new NotFoundException(`Categoria com ID ${data.categoriaId} não encontrada.`);
@@ -30,8 +30,15 @@ export class LojaService {
         // Cria a loja no banco de dados, associando ao usuário (userId)
         const novaLoja = await this.prisma.loja.create({
             data: {
-                ...data, // Inclui todos os campos do DTO (nome, descricao, logo, etc.)
-                usuarioId: userId, // Define o dono da loja
+                nome: data.nome,
+                descricao: data.descricao,
+                // Se houver imagens, elas devem vir do 'files' ou do 'data' dependendo do seu Controller
+                logo: data.logo,
+                banner: data.banner,
+                sticker: data.sticker,
+
+                categoriaId: Number(data.categoriaId),
+                usuarioId: userId,
             },
         });
         return novaLoja;
@@ -54,21 +61,21 @@ export class LojaService {
         // Se um novo nome foi fornecido e é diferente do atual, verifica se já está em uso
         if (data.nome && data.nome !== lojaExistente.nome) {
             const conflitoNome = await this.prisma.loja.findUnique({
-                 where: { nome: data.nome },
-             });
-             if (conflitoNome) {
-                 throw new ConflictException('Já existe outra loja com este nome.');
-             }
+                where: { nome: data.nome },
+            });
+            if (conflitoNome) {
+                throw new ConflictException('Já existe outra loja com este nome.');
+            }
         }
         // Se uma nova categoria foi fornecida, verifica se ela existe
-         if (data.categoriaId) {
-             const categoriaExiste = await this.prisma.categoria.findUnique({
-                 where: { id: data.categoriaId },
-             });
-             if (!categoriaExiste) {
-                 throw new NotFoundException(`Categoria com ID ${data.categoriaId} não encontrada.`);
-             }
-         }
+        if (data.categoriaId) {
+            const categoriaExiste = await this.prisma.categoria.findUnique({
+                where: { id: data.categoriaId },
+            });
+            if (!categoriaExiste) {
+                throw new NotFoundException(`Categoria com ID ${data.categoriaId} não encontrada.`);
+            }
+        }
 
         // Atualiza a loja no banco de dados com os novos dados
         const lojaAtualizada = await this.prisma.loja.update({
@@ -80,12 +87,12 @@ export class LojaService {
 
     // Retorna uma lista de todas as lojas cadastradas (rota pública)
     async findAll(categoriaNome?: string): Promise<Loja[]> {
-        
+
         const whereClause: Prisma.LojaWhereInput = {};
         //filtra busca por categoria
         if (categoriaNome) {
             const catEnum = categoriaNome.toUpperCase() as CategoriasNome;
-            
+
             // Verifica se é uma categoria válida do Enum
             if (Object.values(CategoriasNome).includes(catEnum)) {
                 whereClause.categoria = {
@@ -143,25 +150,25 @@ export class LojaService {
         // Não retorna nada após a exclusão, conforme padrão do UsuarioService
     }
 
-     // Retorna uma lista apenas das lojas pertencentes ao usuário logado
-     async findMyLojas(userId: number): Promise<Loja[]> {
+    // Retorna uma lista apenas das lojas pertencentes ao usuário logado
+    async findMyLojas(userId: number): Promise<Loja[]> {
         return this.prisma.loja.findMany({
             where: { usuarioId: userId }, // Filtra pelo ID do usuário
             include: { categoria: true } // Inclui dados da categoria
         });
     }
 
-    async encontrarPorUsuario(id: number){
-      
+    async encontrarPorUsuario(id: number) {
+
         return this.prisma.loja.findMany({
             where: { usuarioId: id },
-            select: { 
+            select: {
                 id: true,
                 nome: true,
                 descricao: true,
                 logo: true,
-                categoria: { 
-                    select: { nome: true } 
+                categoria: {
+                    select: { nome: true }
                 },
             }
         });

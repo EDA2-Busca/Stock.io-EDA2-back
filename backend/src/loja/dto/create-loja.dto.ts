@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsUrl, MaxLength, IsInt } from 'class-validator';
-
+import { Type } from 'class-transformer';
 // DTO (Data Transfer Object) para validação dos dados ao criar uma nova loja.
 export class CreateLojaDto {
   @IsString({ message: 'O nome deve ser uma string' })
@@ -11,6 +11,7 @@ export class CreateLojaDto {
   @IsOptional() // Agora é opcional conforme schema Prisma
   descricao?: string;
 
+  @Type(() => Number)
   @IsInt({ message: 'O ID da categoria deve ser um número inteiro' })
   @IsNotEmpty({ message: 'O ID da categoria é obrigatório' })
   categoriaId: number; // ID da categoria à qual a loja pertence
