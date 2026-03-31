@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, ConflictException, NotFoundException }
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PrismaService } from '../database/prisma.service';
+import { HashTableService } from './hash-table.service';
 import { Usuario } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { UpdateSenhaDto } from './dto/update-senha.dto';
@@ -9,7 +10,10 @@ import { UpdateSenhaDto } from './dto/update-senha.dto';
 @Injectable()
 export class UsuarioService {
 
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private hashTable: HashTableService 
+    ) {}
 
     async create(data: CreateUsuarioDto) {
 
@@ -41,6 +45,8 @@ export class UsuarioService {
                 fotoPerfil: data.fotoPerfil,
             },
         });
+
+        this.hashTable.inserir(novoUsuario);
 
         delete (novoUsuario as any).senhaHash;
         return novoUsuario;
@@ -124,12 +130,20 @@ export class UsuarioService {
         return usuario;
     }
     async findOneByEmail(email: string): Promise<Usuario | null> {
-        return this.prisma.usuario.findUnique({
-        where: {
-            email: email,
-        },
+        let usuario = this.hashTable.buscar(email);
+        if (usuario) {
+             return usuario; // achou no cache, retorna direto!
+        }
+        usuario = await this.prisma.usuario.findUnique({
+            where: { email: email },
         });
+        if (usuario) {
+            this.hashTable.inserir(usuario);
+        }
+
+        return usuario;
     }
+    
     async delete(id: number) {
 
         const usuarioExistente = await this.prisma.usuario.findUnique({
