@@ -35,7 +35,7 @@ export class AuthService {
     }
 
     // 5. Se a senha não bater, retorna nulo (a LocalStrategy vai tratar)
-    return null;
+    throw new UnauthorizedException('E-mail ou senha inválidos.');
   }
 
   /**
