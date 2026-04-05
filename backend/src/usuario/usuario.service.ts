@@ -143,7 +143,10 @@ export class UsuarioService {
             where: { email: email },
         });
         if (usuario) {
-            this.hashTable.inserir(usuario);
+            // Cache apenas campos seguros (sem senhaHash)
+            const usuarioSeguro = { ...usuario };
+            delete (usuarioSeguro as any).senhaHash;
+            this.hashTable.inserir(usuarioSeguro as Usuario);
         }
 
         return usuario;
