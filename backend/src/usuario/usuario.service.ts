@@ -48,8 +48,13 @@ export class UsuarioService {
 
         this.hashTable.inserir(novoUsuario);
 
-        delete (novoUsuario as any).senhaHash;
-        return novoUsuario;
+        // Cria uma cópia independente do usuário e deleta a senha só da cópia
+        const usuarioSeguro = { ...novoUsuario };
+        delete (usuarioSeguro as any).senhaHash;
+        
+        return usuarioSeguro;
+        //delete (novoUsuario as any).senhaHash;
+        //return novoUsuario;
     }
 
     async update(id:number, data: UpdateUsuarioDto) {
@@ -143,7 +148,7 @@ export class UsuarioService {
 
         return usuario;
     }
-    
+
     async delete(id: number) {
 
         const usuarioExistente = await this.prisma.usuario.findUnique({
