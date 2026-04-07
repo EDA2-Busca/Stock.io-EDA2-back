@@ -1,77 +1,66 @@
-# Stock.io-Gorgonas-Back
-# Stock.io - API Backend
+# Stock.io
 
-API RESTful desenvolvida para o sistema de gerenciamento de estoque Stock.io, como parte do [Processo Treinee Gorgonas].
+Número da Lista: Grupo 2<br>
+Conteúdo da Disciplina: Busca<br>
 
-## 🚀 Tecnologias
+## 👥 Equipe - Grupo 2
 
-Este projeto foi construído com as seguintes tecnologias:
+Dupla responsavel pela implementação dos algoritmos de busca
 
-* **[NestJS](https://nestjs.com/)**: Um framework Node.js progressivo para construir aplicações server-side eficientes e escaláveis.
-* **[Prisma](https://www.prisma.io/)**: Um ORM de próxima geração para Node.js e TypeScript.
-* **[PostgreSQL](https://www.postgresql.org/)**: Um poderoso sistema de banco de dados relacional de código aberto.
-* **[TypeScript](https://www.typescriptlang.org/)**: Um superconjunto de JavaScript que adiciona tipagem estática.
+| Foto | Nome | Matricula |
+|---:|---|---|
+| <img src="https://github.com/giovannafg.png" alt="Giovanna" width="80" style="border-radius:8px" /> | **[Giovanna Felipe](https://github.com/giovannafg)** | 241038998 |
+| <img src="https://github.com/andrehsb.png" alt="Andrei" width="80" style="border-radius:8px" /> | **[André Henrique](https://github.com/andrehsb)** | 241025149 |
 
----
+## Sobre 
+Backend do sistema de Catalogo de produtos e ecommerce, construído com Next.js (App Router) e TypeScript. 
 
-## 🏁 Começando
 
-Siga estas instruções para configurar e rodar o projeto em sua máquina local.
+## Screenshots
+![Demonstração da Busca](./backend/uploads/loghash.jpeg)
+![Demonstração da Busca](./backend/uploads/password.png)
+![Demonstração da Busca](./backend/uploads/login.png)
 
-### Pré-requisitos
+## 🛠️ Tecnologias
+| Categoria | Tecnologia |
+|---|---|
+| Framework | NEST |
+| Linguagem | TypeScript |
+| HTTP Client | Axios |
 
-* [Node.js](https://nodejs.org/en/) (v18 ou superior recomendado)
-* [npm](https://www.npmjs.com/) ou [Yarn](https://yarnpkg.com/)
-* Uma instância do [PostgreSQL](https://www.postgresql.org/download/) rodando.
-* [Git](https://git-scm.com/)
 
-### Instalação
-
-1.  Clone o repositório:
-    ```bash
-    git clone [https://github.com/Processo-Treinee-Gorgonas/Stock.io-Gorgonas-Back.git](https://github.com/Processo-Treinee-Gorgonas/Stock.io-Gorgonas-Back.git)
-    cd Stock.io-Gorgonas-Back
-    ```
-
-2.  Instale as dependências:
-    ```bash
-    npm install
-    ```
-
-3.  Configure as variáveis de ambiente:
-    * Copie o arquivo de exemplo `.env.example` para um novo arquivo chamado `.env`:
-        ```bash
-        cp .env.example .env
-        ```
-    * Abra o arquivo `.env` e adicione a sua string de conexão do PostgreSQL:
-        ```env
-        # .env
-        DATABASE_URL="postgresql://SEU_USUARIO:SUA_SENHA@localhost:5432/NOME_DO_BANCO"
-        ```
-
-4.  Execute as migrations do banco de dados:
-    * Isso irá criar as tabelas no seu banco de dados com base no schema do Prisma.
-    ```bash
-    npx prisma migrate dev
-    ```
-
-5.  Gere o cliente do Prisma:
-    ```bash
-    npx prisma generate
-    ```
-
----
-
-## ▶️ Rodando a Aplicação
-
-Após a instalação, você pode rodar a aplicação em diferentes modos:
+## 🚀 Instalação Rápida
 
 ```bash
-# Modo de desenvolvimento (com watch)
-$ npm run start:dev
+git clone <URL_DO_REPOSITORIO>
+cd backend
 
-# Modo de produção
-$ npm run start:prod
+npm install
 
-# Apenas buildar o projeto
-$ npm run build
+npx prisma db push
+npx prisma db seed
+
+# rodar projeto
+npm run start:dev
+```
+
+## 🔒 Variáveis de Ambiente
+Crie `.env.local` na raiz (mesmo nível do package.json):
+
+```env
+DATABASE_URL="postgresql://USUARIO:SENHA@localhost:5432/NOME_DO_BANCO?schema=public"
+JWT_SECRET="sua_chave_secreta_aqui"
+```
+
+## Uso 
+Ao acessar a aplicação, o usuário, ainda deslogado, será direcionado para a HomePage e terá acesso à todo o catálogo de produtos, categorias e lojas. 
+Após efetuar o login o usuário pode navegar pelo seu perfil para adicionar uma loja, adicionar um produto e adicionar avaliações em outros produtos.
+
+## Outros 
+Link para repositório frontend: https://github.com/eda2-2026/Busca_G2_front
+
+Link para vídeo explicativo: https://youtu.be/GpyrYawFntM
+
+
+## Estruturas de dados implementadas para otimização
+O projeto utiliza a estrutura de Tabela Hash para buscar usuários e autenticar suas senhas para efetuar login
